@@ -11,6 +11,26 @@ from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 
+
+"""
+preprocess.py
+
+	1. 뉴스 데이터 로드
+		1. 소문자 변경
+		2. 알파벳만 뽑기
+		3. 불요어 제거
+		4. 제목, 본문 합치기
+	2. 뉴스 데이터 ~ 단어 토크 나이즈(문장은 그냥 split(\n)했음)
+	3. glove 로드
+	4. glove vocab과 뉴스 데이터 vocab 일치하는 것만 뽑음
+	5. 위 vocab , embedding matrix 저장
+	6. tf-idf 벡터 만들기
+		1. sklearn TfidfVectorizer 사용
+			1. 영어만 쓰기, 출현 단어 빈도 10 이상만 사용, 단어 200개만 사용
+		2. text 벡터로 바꾸기
+		3. 저장
+
+"""
 def save_vocab(vocab, filename):
     print("save vocab")
     with open(filename, "w", encoding='utf-8') as f:
@@ -81,31 +101,30 @@ if __name__ == "__main__":
     stop_words = stopwords.words('english')
     text_df=importData()
     
-#     ## get glove vocab, vector
-#     print('load glove and make embedding matrix')
-#     glove_dim=100
-#     raw_glove=getGlove(glove_dim)
+    ## get glove vocab, vector
+    print('load glove and make embedding matrix')
+    glove_dim=100
+    raw_glove=getGlove(glove_dim)
     
-#     # get inter tokens on Raw Dataset , Glove Vocab
-#     vocab=getTokens(text_df.data) & set(raw_glove.keys())
-#     vocab=list(vocab)
-#     # save tokens
-#     print('save embedding matrix')
-#     save_vocab(vocab,'data/processed_data/vocab.txt')
-#     save_embedding_matrix(vocab,raw_glove,'data/processed_data/embedding_mat.npz',glove_dim)
+    # get inter tokens on Raw Dataset , Glove Vocab
+    vocab=getTokens(text_df.data) & set(raw_glove.keys())
+    vocab=list(vocab)
+    # save tokens
+    print('save embedding matrix')
+    save_vocab(vocab,'data/processed_data/vocab.txt')
+    save_embedding_matrix(vocab,raw_glove,'data/processed_data/embedding_mat.npz',glove_dim)
     
-#     #########################
-#     ## get tf-idf score
-#     print('get tf_idf matrix')
-#     tf_idf_dim=200
-#     text_format=text_df['data'].map(lambda x: ''.join([' '.join(ele) for ele in x])   ).tolist()
-#     vectorizer = TfidfVectorizer(stop_words='english',min_df=10,max_features=tf_idf_dim)
-#     tf_idf_mat = vectorizer.fit_transform(text_format).toarray()
-#     tf_idf_words=vectorizer.get_feature_names()
-#     print('save tf_idf matrix')
-#     save_vocab(tf_idf_words,'data/processed_data/tf_idf_vocab.txt')
-#     np.savez_compressed('data/processed_data/tf_idf_mat.npz', embeddings=tf_idf_mat)
-    
+    #########################
+    ## get tf-idf score
+    print('get tf_idf matrix')
+    tf_idf_dim=200
+    text_format=text_df['data'].map(lambda x: ''.join([' '.join(ele) for ele in x])   ).tolist()
+    vectorizer = TfidfVectorizer(stop_words='english',min_df=10,max_features=tf_idf_dim)
+    tf_idf_mat = vectorizer.fit_transform(text_format).toarray()
+    tf_idf_words=vectorizer.get_feature_names()
+    print('save tf_idf matrix')
+    save_vocab(tf_idf_words,'data/processed_data/tf_idf_vocab.txt')
+    np.savez_compressed('data/processed_data/tf_idf_mat.npz', embeddings=tf_idf_mat)
     
     
     ##########

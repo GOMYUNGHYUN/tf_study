@@ -19,7 +19,25 @@ import sys
 
 from sklearn import preprocessing
 
+"""
+훈련/평가 실행
+python logistic_regression_train base
 
+텐서보드 확인
+tensorboard --logdir=./data/temp/LOG/
+
+
+1. 전처리한 데이터 로드
+2. tensor에 넣기 위한 데이터 처리
+    1. feature 생성 
+        1.text -> glove 임베딩 벡터로 표현하기( 벡터 mean )
+        2.glove + tf_idf 벡터 합치기
+    2. label 생성
+        1. label encoding & one hot encoding
+3. model 로드 & 훈련/시험
+   (세부사항은 mymodel.py)
+
+"""
 vocabs_path='data/processed_data/vocab.txt'
 glove_mat_path='data/processed_data/embedding_mat.npz'
 tf_idf_vocabs_path='data/processed_data/tf_idf_vocab.txt'
