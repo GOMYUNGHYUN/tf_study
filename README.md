@@ -2,4 +2,6 @@
 qq study
 
 
-실행 : python logistic_regression_train.py base
+데이터 준비 python preprocess.py
+
+Model 학습 및 평가 : python logistic_regression_train.py base
