@@ -112,7 +112,7 @@ class MyModel(object):
                 train_loss= sess.run([self.training_OP],feed_dict=fd )
 
                 # tensorboard
-                if i % 10 == 0:
+                if i % 50 == 0:
                     # Add epoch to epoch_values
                     summary_results, train_accuracy, newCost = sess.run(
                         [self.all_summary_OPS, self.accuracy_OP, self.cost_OP], 

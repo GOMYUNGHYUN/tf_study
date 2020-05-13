@@ -100,58 +100,6 @@ def sentenceToMeanVect(datasets,vocab,embeddingMat):
         new_datasets[news_index]=one_news.mean(axis=0)
             
     return new_datasets
-    
-def getPlaceholder(numFeatures,numLabels):
-    X = tf.placeholder(tf.float32, [None, numFeatures])
-    # yGold = Y-matrix / label-matrix / labels... This will be our correct answers
-    # matrix. Every row has either [1,0] for SPAM or [0,1] for HAM. 'None' here 
-    # means that we can hold any number of emails
-    yGold = tf.placeholder(tf.float32, [None, numLabels])
-    
-    return X,yGold
-
-def getVariables(numFeatures,numLabels):
-    weights = tf.Variable(tf.random_normal([numFeatures,numLabels],
-                                           mean=0,
-                                           stddev=(np.sqrt(6/(numFeatures+
-                                                             numLabels+1))),
-                                           name="weights"))
-
-    bias = tf.Variable(tf.random_normal([1,numLabels],
-                                        mean=0,
-                                        stddev=(np.sqrt(6/(numFeatures+numLabels+1))),
-                                        name="bias"))
-    return weights,bias
-    
-def setGraph(lr):
-    
-
-    
-    ######################
-    ### PREDICTION OPS ###
-    ######################
-    # PREDICTION ALGORITHM i.e. FEEDFORWARD ALGORITHM
-    apply_weights_OP = tf.matmul(X, w1, name="apply_weights")
-    add_bias_OP = tf.add(apply_weights_OP, b1, name="add_bias") 
-    activation_OP = tf.nn.sigmoid(add_bias_OP, name="activation")
-
-
-    #####################
-    ### EVALUATION OP ###
-    #####################
-
-    # COST FUNCTION i.e. MEAN SQUARED ERROR
-    cost_OP = tf.nn.l2_loss(activation_OP-Y, name="squared_error_cost")
-
-
-    #######################
-    ### OPTIMIZATION OP ###
-    #######################
-
-    # OPTIMIZATION ALGORITHM i.e. GRADIENT DESCENT
-    training_OP = tf.train.GradientDescentOptimizer(lr).minimize(cost_OP)
-    
-    return training_OP
 
 
 if __name__ == "__main__":
@@ -191,7 +139,7 @@ if __name__ == "__main__":
     ## TRAINING SESSION PARAMETERS
     # number of times we iterate through training data
     # tensorboard shows that accuracy plateaus at ~25k epochs
-    numEpochs = 500
+    numEpochs = 3000
     # a smarter learning rate for gradientOptimizer
 
     
