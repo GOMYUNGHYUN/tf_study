@@ -146,7 +146,9 @@ def sentenceToMeanVect(datasets,vocab,embeddingMat):
             
     return new_datasets
 
-def getWord2IDvect(datasets,wordId_dict,maxSeqLen):
+
+def getWord2IDvect(datasets,wordId_dict,maxSeqLen,maxWordLen):
+    # max list length = 300
     newDatasets=[]
     for news_index,dataset in enumerate(datasets):
         sentenceIds=[]
@@ -161,8 +163,12 @@ def getWord2IDvect(datasets,wordId_dict,maxSeqLen):
                     word='unk'
                     sentenceIds.append(wordId_dict[word])
             sentenceIds.append(wordId_dict['eos'])
-        newDatasets.append(sentenceIds)
-    return newDatasets
+        if len(sentenceIds)<maxWordLen:
+            sentenceIds+=[wordId_dict['eos']]*(maxWordLen-len(sentenceIds))
+        else:
+            sentenceIds=sentenceIds[:maxWordLen]
+        newDatasets.append(np.array(sentenceIds))
+    return np.array(newDatasets)
     
     
 
@@ -204,8 +210,9 @@ if __name__ == "__main__":
     ## TRAINING SESSION PARAMETERS
     # number of times we iterate through training data
     # tensorboard shows that accuracy plateaus at ~25k epochs
-    numEpochs = 1000
+    numEpochs = 100
     seqLen=30
+    maxWordLen=300
     # a smarter learning rate for gradientOptimizer
 
     
@@ -263,22 +270,34 @@ if __name__ == "__main__":
         
         """
         numTfFeatures=train_tf_idf_mat.shape[1]
-        
-        #from myLstmModel import MyModel as lstmModel
+        numEMBFeatures=glove_mat.shape[1]
+        numLabels = len(list(le.classes_)) #  list(le.classes_) => [ FAKE , REAL]
+        print('numTfFeatures',numTfFeatures)
+        print('numEMBFeatures',numEMBFeatures)
+
         # get word id vector
-        trainX_vect=getWord2IDvect(trainX,vocabs,seqLen)
-        testX_vect=getWord2IDvect(testX,vocabs,seqLen)
-        valX_vect=getWord2IDvect(valX,vocabs,seqLen)
-        
+        trainX_vect=getWord2IDvect(trainX,vocabs,seqLen,maxWordLen)
+        testX_vect=getWord2IDvect(testX,vocabs,seqLen,maxWordLen)
+        valX_vect=getWord2IDvect(valX,vocabs,seqLen,maxWordLen)
+
+        from myLstmModel import MyModel as lstmModel
+
         # text word -> index
         sess = tf.Session()
         model=lstmModel(
-            [seqLen, numLabels,numTfFeatures],
-            [trainX_vect,trainY,testX_vect,testY,valX_vect,valY]
+            seqLen, maxWordLen, numLabels,numTfFeatures,numEMBFeatures,
+            trainX_vect,trainY,testX_vect,testY,valX_vect,valY,
             glove_mat,
-            [train_tf_idf_mat, test_tf_idf_mat, val_tf_idf_mat]
-        )
-        
+            train_tf_idf_mat, test_tf_idf_mat, val_tf_idf_mat
+        ) # [seqLen, numLabels, numTfFeatures],[Train_X,Train_Y,Test_X,Test_Y, ,Val_X, Val_Y],gloveEmbedMat,[Train_tf_idf,Test_tf_idf,Val_tf_idf]
+        config = tf.ConfigProto()
+        with tf.Session(config=config) as sess: #config=tf.ConfigProto(log_device_placement=True)
+            print('build')
+            model.build()
+            print('train')
+            model.train(sess,numEpochs)
+            
+        model.testAcc()
         
         
         
